@@ -1,5 +1,5 @@
 import { Box, List, ListItemButton, ListItemText, TextField } from "@mui/material";
-import axios from "axios";
+import axios, { CanceledError } from "axios";
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
 
@@ -41,8 +41,12 @@ function App() {
           );
           setDrugSearchResults(drugs);
         } catch (e) {
-          console.error(e);
-          // TODO: handle
+          if (e instanceof CanceledError) {
+            // Ignore
+          } else {
+            console.error(e);
+            window.alert("Oops! Something went wrong...");
+          }
         }
       })();
     }
