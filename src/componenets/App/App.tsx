@@ -115,7 +115,15 @@ function App() {
           {prescriptionTableRows.map((row) => {
             return (
               <ListItemButton key={row.drug.code}>
-                <ListItemText primary={row.drug.name} />
+                <ListItemText
+                  primary={row.drug.name.substring(
+                    0,
+                    row.drug.name.indexOf("(") - 1
+                  )}
+                  secondary={row.drug.name.substring(
+                    row.drug.name.indexOf("(")
+                  )}
+                />
               </ListItemButton>
             );
           })}
