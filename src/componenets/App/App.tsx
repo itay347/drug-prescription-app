@@ -1,12 +1,10 @@
 import { Box, List, ListItemButton, ListItemText, TextField } from "@mui/material";
-import axios, { CanceledError } from "axios";
+import { CanceledError } from "axios";
 import { useEffect, useRef, useState } from "react";
+import { searchDrugs } from "../../services/drugSearchAutocomplete";
+import { Drug } from "../../types";
 import "./App.css";
 
-type Drug = {
-  code: number;
-  name: string;
-}
 
 function App() {
   const [searchText, setSearchText] = useState<string>("");
@@ -26,19 +24,7 @@ function App() {
         try {
           const controller = new AbortController();
           abortControllerRef.current = controller;
-          let response = await axios.get(
-            "https://clinicaltables.nlm.nih.gov/api/rxterms/v3/search",
-            {
-              params: { terms: searchText, ef: "RXCUIS" },
-              signal: controller.signal
-            }
-          );
-          const data = response.data;
-          // NOTE: for the sake of this exercise I'm assuming there is only one 'strength' and taking the first code from RXCUIS
-          const drugs: Drug[] = data[1].map(
-            (name: string, index: number) =>
-              ({ code: data[2]["RXCUIS"][index][0], name: name } as Drug)
-          );
+          let drugs = await searchDrugs(searchText, controller.signal);
           setDrugSearchResults(drugs);
         } catch (e) {
           if (e instanceof CanceledError) {
