@@ -48,6 +48,7 @@ function App() {
           label="Search Drug"
           variant="outlined"
           fullWidth
+          autoFocus
           type="text"
           value={searchText}
           onChange={(event) => setSearchText(event.target.value)}
