@@ -1,6 +1,6 @@
 import { Box, List, ListItemButton, ListItemText, TextField } from "@mui/material";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./App.css";
 
 type Drug = {
@@ -12,17 +12,25 @@ function App() {
   const [searchText, setSearchText] = useState<string>("");
   const [drugSearchResults, setDrugSearchResults] = useState<Drug[]>([]);
 
+  const abortControllerRef = useRef<AbortController>();
+
   useEffect(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
     if (!(searchText && searchText.length > 0)) {
       setDrugSearchResults([]);
     } else {
       (async () => {
         try {
-          // TODO: use abort controller
+          const controller = new AbortController();
+          abortControllerRef.current = controller;
           let response = await axios.get(
             "https://clinicaltables.nlm.nih.gov/api/rxterms/v3/search",
             {
               params: { terms: searchText, ef: "RXCUIS" },
+              signal: controller.signal
             }
           );
           const data = response.data;
@@ -33,10 +41,15 @@ function App() {
           );
           setDrugSearchResults(drugs);
         } catch (e) {
+          console.error(e);
           // TODO: handle
         }
       })();
     }
+
+    return () => {
+      abortControllerRef.current?.abort();
+    };
   }, [searchText]);
 
   return (
